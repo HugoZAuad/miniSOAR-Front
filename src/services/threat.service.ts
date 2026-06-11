@@ -1,19 +1,9 @@
-import { api } from "@/services/api";
-
-export interface Threat {
-  id: string;
-  indicator: string;
-  type: string;
-  severity: number;
-  hybridScore: number;
-  country?: string;
-  reputationScore?: number;
-  recurrencyCount: number;
-  createdAt: string;
-}
+import { Threat } from "@/types/threat";
+import { api } from "./api";
 
 export interface ThreatsResponse {
   data: Threat[];
+
   meta: {
     total: number;
     page: number;
@@ -22,18 +12,33 @@ export interface ThreatsResponse {
   };
 }
 
-export interface CreateThreatInput {
-  indicator: string;
-  type: string;
-  severity: number;
+export async function getThreats(params?: {
+  indicator?: string;
+  severity?: number;
+}): Promise<ThreatsResponse> {
+  const { data } =
+    await api.get<ThreatsResponse>(
+      "/threats",
+      {
+        params,
+      }
+    );
+
+  return data;
 }
 
-export async function getThreats() {
-  const response = await api.get<ThreatsResponse>("/threats");
-  return response.data;
-}
+export async function createThreat(
+  payload: {
+    indicator: string;
+    type: string;
+    severity: number;
+  }
+) {
+  const { data } =
+    await api.post(
+      "/threats",
+      payload
+    );
 
-export async function createThreat(input: CreateThreatInput) {
-  const response = await api.post<Threat>("/threats", input);
-  return response.data;
+  return data;
 }

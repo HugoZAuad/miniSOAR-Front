@@ -1,11 +1,19 @@
-import { ThreatService } from "@/services/threat.service";
 import { useQuery } from "@tanstack/react-query";
 
-export function useThreats() {
+import { getThreats } from "@/services/threat.service";
+
+interface ThreatFilters {
+  indicator?: string;
+  severity?: number;
+}
+
+export function useThreats(
+  filters?: ThreatFilters
+) {
   return useQuery({
-    queryKey: ["threats"],
+    queryKey: ["threats", filters],
 
     queryFn: () =>
-      ThreatService.list(),
+      getThreats(filters),
   });
 }

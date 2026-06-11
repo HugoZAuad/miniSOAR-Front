@@ -1,9 +1,9 @@
 "use client";
 
-import { QueryProvider } from "./QueryProvider";
-import { ThemeProvider } from "./ThemeProvider";
-
 import { ThemeContextProvider } from "@/contexts/ThemeContext";
+import { QueryProvider } from "./QueryProvider";
+import { RealTimeSupervisor } from "./RealTimeSupervisor";
+import { ThemeProvider } from "./ThemeProvider";
 
 export function Providers({
   children,
@@ -14,7 +14,9 @@ export function Providers({
     <ThemeProvider>
       <ThemeContextProvider>
         <QueryProvider>
-          {children}
+          <RealTimeSupervisor>
+            {children}
+          </RealTimeSupervisor>
         </QueryProvider>
       </ThemeContextProvider>
     </ThemeProvider>

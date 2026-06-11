@@ -7,5 +7,6 @@ export interface Threat {
   country?: string;
   reputationScore?: number;
   recurrencyCount: number;
+  tags?: string[];
   createdAt: string;
 }
