@@ -6,6 +6,7 @@ import { api } from "@/services/api";
 
 import type {
   PaginatedThreats,
+  Threat,
 } from "@/types/threat";
 
 export interface ThreatFilters {
@@ -40,6 +41,50 @@ export function useThreats(
                 undefined,
             },
           }
+        );
+
+      return response.data;
+    },
+  });
+}
+
+export function useThreat(
+  threatId?: string
+) {
+  return useQuery({
+    enabled: !!threatId,
+
+    queryKey: [
+      "threat",
+      threatId,
+    ],
+
+    queryFn: async () => {
+      const response =
+        await api.get<Threat>(
+          `/threats/${threatId}`
+        );
+
+      return response.data;
+    },
+  });
+}
+
+export function useThreatHistory(
+  threatId?: string
+) {
+  return useQuery({
+    enabled: !!threatId,
+
+    queryKey: [
+      "threat-history",
+      threatId,
+    ],
+
+    queryFn: async () => {
+      const response =
+        await api.get(
+          `/threats/${threatId}/history`
         );
 
       return response.data;

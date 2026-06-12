@@ -1,76 +1,115 @@
 "use client";
 
-import { Threat } from "@/types/threat";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Radar,
+  Shield,
+} from "lucide-react";
+
+interface TimelineEvent {
+  title: string;
+  description: string;
+  createdAt: string;
+  type:
+    | "created"
+    | "enriched"
+    | "risk"
+    | "contained";
+}
 
 interface Props {
-  threat: Threat;
+  events: TimelineEvent[];
 }
 
 export function ThreatTimeline({
-  threat,
+  events,
 }: Props) {
+  if (!events.length) {
+    return (
+      <div className="rounded-xl border p-6">
+        Nenhum evento encontrado.
+      </div>
+    );
+  }
+
   return (
-    <div className="border rounded-xl p-5">
-      <h3 className="font-semibold mb-4">
-        Timeline
+    <div className="rounded-xl border p-5">
+      <h3 className="font-semibold mb-6">
+        Threat Timeline
       </h3>
 
-      <div className="space-y-4">
-
-        <TimelineItem
-          title="IOC Created"
-          date={
-            threat.createdAt
-          }
-        />
-
-        <TimelineItem
-          title="Risk Calculated"
-          date={
-            threat.createdAt
-          }
-        />
-
-        <TimelineItem
-          title="Threat Enriched"
-          date={
-            threat.createdAt
-          }
-        />
-
+      <div className="space-y-6">
+        {events.map(
+          (event, index) => (
+            <TimelineItem
+              key={index}
+              event={event}
+            />
+          )
+        )}
       </div>
     </div>
   );
 }
 
 function TimelineItem({
-  title,
-  date,
+  event,
 }: {
-  title: string;
-  date: string;
+  event: TimelineEvent;
 }) {
+  const Icon =
+    event.type === "created"
+      ? Shield
+      : event.type === "enriched"
+      ? Radar
+      : event.type === "risk"
+      ? AlertTriangle
+      : CheckCircle2;
+
   return (
     <div className="flex gap-4">
       <div
         className="
-          h-3
-          w-3
+          flex
+          h-10
+          w-10
+          items-center
+          justify-center
           rounded-full
-          bg-primary
-          mt-2
+          border
+          bg-muted
         "
-      />
+      >
+        <Icon className="h-4 w-4" />
+      </div>
 
-      <div>
+      <div className="flex-1">
         <div className="font-medium">
-          {title}
+          {event.title}
         </div>
 
-        <div className="text-sm text-muted-foreground">
+        <div
+          className="
+            text-sm
+            text-muted-foreground
+          "
+        >
+          {event.description}
+        </div>
+
+        <div
+          className="
+            mt-1
+            text-xs
+            text-muted-foreground
+          "
+        >
           {new Date(
-            date
-          ).toLocaleString()}
+            event.createdAt
+          ).toLocaleString(
+            "pt-BR"
+          )}
         </div>
       </div>
     </div>

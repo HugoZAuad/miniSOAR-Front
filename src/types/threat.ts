@@ -49,3 +49,21 @@ export interface CreateThreatInput {
   type: ThreatType;
   severity: number;
 }
+
+export interface ThreatHistoryEvent {
+  id: string;
+
+  threatId: string;
+
+  title: string;
+
+  description: string;
+
+  type:
+    | "created"
+    | "enriched"
+    | "risk"
+    | "contained";
+
+  createdAt: string;
+}
