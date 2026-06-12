@@ -1,33 +1,41 @@
-import { Header } from '@/components/layout/Header'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { ReactQueryProvider } from '@/lib/query-provider'
-import type { Metadata } from 'next'
-import { ThemeProvider } from 'next-themes'
-import './globals.css'
+import {
+  Toaster,
+} from "@/components/ui/sonner";
+import { SettingsProvider } from "@/contexts/settings-context";
+import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/providers/query-provider";
+import { RealtimeProvider } from "@/providers/realtime-provider";
+import { SocketProvider } from "@/providers/socket-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
-
-export const metadata: Metadata = {
-  title: 'MiniSOAR',
-  description: 'Plataforma de Segurança SOAR — Orquestração, Automação e Resposta',
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning className={cn("font-sans", inter.variable)}
+    >
       <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <ReactQueryProvider>
-            <div className="app-shell">
-              <Sidebar />
-              <div className="main-area">
-                <Header />
-                <main className="page-content">{children}</main>
-              </div>
-            </div>
-          </ReactQueryProvider>
+        <ThemeProvider>
+          <QueryProvider>
+            <SocketProvider>
+              <RealtimeProvider>
+                <SettingsProvider>
+                  {children}
+                </SettingsProvider>
+              </RealtimeProvider>
+            </SocketProvider>
+          </QueryProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

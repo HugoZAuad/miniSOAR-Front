@@ -1,0 +1,46 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useState,
+} from "react";
+
+const SidebarContext =
+  createContext(
+    {} as {
+      collapsed: boolean;
+      toggle: () => void;
+    }
+  );
+
+export function SidebarProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [
+    collapsed,
+    setCollapsed,
+  ] = useState(false);
+
+  return (
+    <SidebarContext.Provider
+      value={{
+        collapsed,
+        toggle: () =>
+          setCollapsed(
+            (v) => !v
+          ),
+      }}
+    >
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+export const useSidebar =
+  () =>
+    useContext(
+      SidebarContext
+    );
