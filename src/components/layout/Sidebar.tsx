@@ -8,6 +8,7 @@ import {
   Activity,
   AlertTriangle,
   Radar,
+  Settings,
   Shield,
   Upload,
 } from "lucide-react";
@@ -44,6 +45,11 @@ export function Sidebar() {
       href: "/dashboard/intelligence",
       icon: Radar,
     },
+    {
+      title: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
+    }
   ];
 
   return (

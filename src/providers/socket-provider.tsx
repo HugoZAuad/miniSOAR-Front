@@ -3,58 +3,124 @@
 import {
   useEffect,
   useMemo,
-  useState
+  useState,
 } from "react";
 
-import { io, Socket } from "socket.io-client";
+import {
+  io,
+  Socket,
+} from "socket.io-client";
 
 import {
   SocketContext,
 } from "@/contexts/socket-context";
+
+import {
+  useSettings,
+} from "@/contexts/settings-context";
 
 export function SocketProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const {
+    settings,
+  } = useSettings();
+
   const [socket, setSocket] =
     useState<Socket | null>(
-      null
+      null,
     );
 
   useEffect(() => {
+    if (
+      !settings.realtimeEnabled
+    ) {
+      socket?.disconnect();
+
+      setSocket(null);
+
+      return;
+    }
+
+    const socketUrl =
+      settings.apiUrl.replace(
+        "/api/v1",
+        "",
+      );
+
     const instance = io(
-      process.env
-        .NEXT_PUBLIC_API_URL!
-        .replace("/api/v1", ""),
+      socketUrl,
       {
         transports: [
           "websocket",
         ],
-      }
+
+        reconnection: true,
+
+        reconnectionAttempts:
+          Infinity,
+
+        reconnectionDelay: 1000,
+
+        reconnectionDelayMax:
+          5000,
+
+        timeout: 10000,
+      },
     );
 
     instance.on(
       "connect",
       () => {
         console.log(
-          "Socket connected:",
-          instance.id
+          "[Socket] Connected:",
+          instance.id,
         );
-      }
+      },
     );
 
-    setSocket(instance);
+    instance.on(
+      "disconnect",
+      (reason) => {
+        console.log(
+          "[Socket] Disconnected:",
+          reason,
+        );
+      },
+    );
+
+    instance.on(
+      "connect_error",
+      (error) => {
+        console.error(
+          "[Socket] Connect error:",
+          error.message,
+        );
+      },
+    );
+
+    setSocket(
+      instance,
+    );
 
     return () => {
+      instance.removeAllListeners();
+
       instance.disconnect();
+
+      setSocket(null);
     };
-  }, []);
+  }, [
+    settings.apiUrl,
+    settings.realtimeEnabled,
+  ]);
 
   const value =
     useMemo(
       () => socket,
-      [socket]
+      [socket],
     );
 
   return (

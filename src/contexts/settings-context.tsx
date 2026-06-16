@@ -7,53 +7,107 @@ import {
   useState,
 } from "react";
 
-interface SettingsContextData {
+export interface AppSettings {
   apiUrl: string;
   apiKey: string;
+  realtimeEnabled: boolean;
+  theme: "light" | "dark" | "system";
+}
 
-  setApiUrl: (value: string) => void;
-  setApiKey: (value: string) => void;
+export const DEFAULT_SETTINGS: AppSettings = {
+  apiUrl:
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:3001/api/v1",
+
+  apiKey:
+    process.env.NEXT_PUBLIC_API_KEY ??
+    "",
+
+  realtimeEnabled: true,
+
+  theme: "dark",
+};
+
+interface SettingsContextData {
+  settings: AppSettings;
+
+  updateSettings: (
+    values: Partial<AppSettings>,
+  ) => void;
+
+  resetSettings: () => void;
 }
 
 const SettingsContext =
-  createContext<SettingsContextData | null>(null);
+  createContext<
+    SettingsContextData | undefined
+  >(undefined);
 
 export function SettingsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [apiUrl, setApiUrl] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [settings, setSettings] =
+    useState<AppSettings>(
+      DEFAULT_SETTINGS,
+    );
 
   useEffect(() => {
-    setApiUrl(
-      localStorage.getItem("api-url") ??
-        "http://localhost:3001/api/v1"
-    );
+    const stored =
+      localStorage.getItem(
+        "minisoar-settings",
+      );
 
-    setApiKey(
-      localStorage.getItem("api-key") ?? ""
-    );
+    if (!stored) {
+      return;
+    }
+
+    try {
+      setSettings(
+        JSON.parse(stored),
+      );
+    } catch {
+      localStorage.removeItem(
+        "minisoar-settings",
+      );
+    }
   }, []);
 
-  const handleApiUrl = (value: string) => {
-    localStorage.setItem("api-url", value);
-    setApiUrl(value);
+  const updateSettings = (
+    values: Partial<AppSettings>,
+  ) => {
+    setSettings((previous) => {
+      const next = {
+        ...previous,
+        ...values,
+      };
+
+      localStorage.setItem(
+        "minisoar-settings",
+        JSON.stringify(next),
+      );
+
+      return next;
+    });
   };
 
-  const handleApiKey = (value: string) => {
-    localStorage.setItem("api-key", value);
-    setApiKey(value);
+  const resetSettings = () => {
+    localStorage.removeItem(
+      "minisoar-settings",
+    );
+
+    setSettings(
+      DEFAULT_SETTINGS,
+    );
   };
 
   return (
     <SettingsContext.Provider
       value={{
-        apiUrl,
-        apiKey,
-        setApiUrl: handleApiUrl,
-        setApiKey: handleApiKey,
+        settings,
+        updateSettings,
+        resetSettings,
       }}
     >
       {children}
@@ -62,10 +116,15 @@ export function SettingsProvider({
 }
 
 export function useSettings() {
-  const context = useContext(SettingsContext);
+  const context =
+    useContext(
+      SettingsContext,
+    );
 
   if (!context) {
-    throw new Error("useSettings");
+    throw new Error(
+      "useSettings must be used inside SettingsProvider",
+    );
   }
 
   return context;
